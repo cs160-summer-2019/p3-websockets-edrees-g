@@ -16,20 +16,91 @@
 </head>
 <body>
     <!-- You may change the dimensions of this canvas -->
-    <canvas id="myCanvas" width="750px" height="750px"></canvas>
+    <canvas id="myCanvas" width="1000px" height="1000px"></canvas>
 </body>
 <script>
 
-    // setting up the canvas and one paper tool
-    var canvas = document.getElementById('myCanvas');
-    paper.setup(canvas);
-    var tool = new paper.Tool();
+  // setting up the canvas and one paper tool
+  var canvas = document.getElementById('myCanvas');
+  paper.setup(canvas);
+  var tool = new paper.Tool();
 
-    // getting the URL (you may want to use for Exercise 3)
-    var url = window.location.href;
+  //Random color generator was taken straight from stackoverflow:
+  //<https://stackoverflow.com/questions/1484506/random-color-generator>
+  function getRandomColor() {
+    var letters = '0123456789ABCDEF';
+    var color = '#';
+    for (var i = 0; i < 6; i++) {
+      color += letters[Math.floor(Math.random() * 16)];
+    }
+    return color;
+  }
+  
+  // getting the URL (you may want to use for Exercise 3)
+  var url = window.location.href;
+  
+  var users = {};
+  var userID = Math.random();
+  //var path = new paper.Path(); 
+  var color = getRandomColor();
+//   path.strokeColor = color;
+//   path.strokeWidth = 5;
+//   var message;
+  
+  var socket = new WebSocket('wss://p3-websockets-edrees-g-edreesgul815250.codeanyapp.com/ws/draw');
+  
+  tool.onMouseMove = function(event) {
+//    path.add(event.point);
+//     var color = getRandomColor();
+//     path.strokeColor = color;
+//     path.strokeWidth = 5;
+    var xPos = event.point.x;
+    var yPos = event.point.y;
+    var message = JSON.stringify({x: xPos, y:yPos, color: color, user: userID, url: url});
+    socket.send(message);
+  }
+  
+  socket.onmessage = function(receivedMessage) {
+    var data = JSON.parse(receivedMessage.data);
+    
+    if (!(data.user in users)) {
+      users[data.user] = new paper.Path();
+      //users[data.user].strokeWidth = 5;
+    };
+    
+    if (url == "http://p3-websockets-edrees-g-edreesgul815250.codeanyapp.com/draw/?size=large") {
+      users[data.user].strokeColor = data.color;
+      users[data.user].strokeWidth = 10;
+      var point = new paper.Point(data.x, data.y);
+      users[data.user].add(point);
+    } else if (data.user == userID) {
+      users[data.user].strokeColor = data.color;
+      users[data.user].strokeWidth = 10;
+      var point = new paper.Point(data.x, data.y);
+      users[data.user].add(point);
+    }
+         
+    };
+  
+  socket.onclose = function(e) {
+    console.error('Chat socket closed unexpectedly');
+  };
+  
+  $(document).ready(() => {
+    window.addEventListener('devicemotion', (event) => {
+      if ((Math.abs(event.acceleration.x) > 10) || (Math.abs(event.acceleration.y) > 10) || (Math.abs(event.acceleration.z) > 10)) {
+        paper.project.clear();
+      }
+    });
+    
+    window.addEventListener('deviceorientation', (event) => {
+      console.log('first');
+      if (Math.abs(event.gamma) > 15) {
+        color = getRandomColor();
+      }
+    });
+  });
 
-    // var socket = new WebSocket(
-    //     'wss://<your url here>/ws/draw');
 
 
 </script>
