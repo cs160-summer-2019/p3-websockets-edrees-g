@@ -1,0 +1,247 @@
+<!-- https://p3-websockets-edrees-g-edreesgul815250.codeanyapp.com/draw/smallDisplay/? -->
+
+<!DOCTYPE HTML>
+
+<!-- countdown timer taken from: <https://www.geeksforgeeks.org/create-countdown-timer-using-javascript/> -->
+
+<html lang = "en">
+  
+  <head>
+    
+    <title>ICEBREAKER APP</title>
+    
+    <meta charset = "UTF-8" name="viewport" content="width=device-width, initial-scale=1.0" />
+    
+    <style>
+      
+      body { 
+        text-align: center; 
+        background: #FFFFFF; 
+        font-family: sans-serif; 
+        font-weight: 100; 
+      }
+      
+      .ice {
+        padding: 50px;
+        border-radius: 70px;
+        color: white;
+        background-color: #87CEEB;
+      }
+      
+      .clockH { 
+        color: #FFFFFF; 
+        background: #87CEEB;
+        border-radius: 25px;
+        font-weight: 100; 
+        font-size: 40px; 
+        margin: 10px 25% 10px 25%; 
+        padding: 10px;
+      } 
+      
+      #clockdiv { 
+          font-family: sans-serif; 
+          color: #fff; 
+          display: inline-block; 
+          font-weight: 100; 
+          text-align: center; 
+          font-size: 30px; 
+      } 
+      
+      #clockdiv > div { 
+          padding: 10px; 
+          border-radius: 3px; 
+          background: #87CEEB; 
+          display: inline-block; 
+      } 
+      
+      #clockdiv div > span { 
+          padding: 15px; 
+          border-radius: 3px; 
+          background: #6495ED; 
+          display: inline-block; 
+      } 
+      
+      smalltext { 
+          padding-top: 5px; 
+          font-size: 16px; 
+      } 
+      
+      #demo {
+        
+      }
+      
+      .gender {
+        margin: 20px;
+        padding: 20px;
+/*         border: medium solid gray; */
+      }
+      
+      .name {
+        margin: 20px;
+        padding: 20px;
+/*         border: medium solid gray; */
+      }
+      
+      .answer {
+        margin: 20px;
+        padding: 20px;
+/*         border: medium solid gray; */
+      }
+      
+      .content {
+        margin: 10px;
+      }
+      
+      .firstname {
+        margin: 10px;
+      }
+      
+      .lastname {
+        margin: 10px;
+      }
+      
+      legend {
+        margin: 10px;
+      }
+      
+      .info {
+        margin: 40px 0px 0px 0px;
+      }
+      
+    </style>
+    
+  </head>
+  
+  <body>
+    
+    <h1 class="ice"> ICE BREAKER! </h1> 
+    
+    <p id="demo"></p> 
+    
+    <h1 class="clockH">Countdown Clock</h1> 
+    
+    <div id="clockdiv"> 
+<!--       <div> 
+        <span class="days" id="day"></span> 
+        <div class="smalltext">Days</div> 
+      </div> 
+      <div> 
+        <span class="hours" id="hour"></span> 
+        <div class="smalltext">Hours</div> 
+      </div>  -->
+      <div> 
+        <span class="minutes" id="minute"></span> 
+        <div class="smalltext">Minutes</div> 
+      </div> 
+      <div> 
+        <span class="seconds" id="second"></span> 
+        <div class="smalltext">Seconds</div> 
+      </div> 
+    </div> 
+    
+     <p class="info"> Answer the question(s) displayed on the large screen so that you may see who you are likely to connect with! </p>
+    
+     <div class="container">
+        <div class="row">
+            <div class="col-12" style="text-align: center; font-size: 40px; margin-top: -90px; margin-bottom: -60px">
+          </div>
+
+        </div>
+    </div>
+    
+    <form class="answer" action="/draw/largeDisplay/" target="_blank">
+      <fieldset>
+        <legend>Enter your answer in the text box below!</legend>
+        Response:<br>
+        <input type = "textarea" name="response" id = "myText" value = "type here!" class = "content"/><br>
+        First name:<br>
+        <input type="text" name="firstname" value="Mickey" class = "firstname"><br>
+        Last name:<br>
+        <input type="text" name="lastname" value="Mouse" class = "lastname"><br>
+        <input type="submit" value="Submit" class = "special">
+      </fieldset>
+    </form>
+    
+  
+    
+    </fieldset>
+    </form>
+    
+    <script> 
+      
+      //CODE FOR COUNTDOWN TIMER
+      //TIME CURRENTLY SET TO: 15 SECONDS.
+      
+      {
+      
+      var time_in_minutes = .56;
+      var current_time = Date.parse(new Date());
+      var deadline = new Date(current_time + time_in_minutes*60*1000);
+      
+      //var deadline = new Date("dec 31, 2019 15:37:25").getTime(); 
+      var x = setInterval(function() { 
+      var now = new Date().getTime(); 
+      var t = deadline - now; 
+      //var days = Math.floor(t / (1000 * 60 * 60 * 24)); 
+      //var hours = Math.floor((t%(1000 * 60 * 60 * 24))/(1000 * 60 * 60)); 
+      var minutes = Math.floor((t % (1000 * 60 * 60)) / (1000 * 60)); 
+      var seconds = Math.floor((t % (1000 * 60)) / 1000); 
+      //document.getElementById("day").innerHTML =days ; 
+      //document.getElementById("hour").innerHTML =hours; 
+      document.getElementById("minute").innerHTML = minutes;  
+      document.getElementById("second").innerHTML =seconds;  
+      if (t < 0) { 
+        clearInterval(x); 
+        document.getElementById("demo").innerHTML = "TIME UP"; 
+        //document.getElementById("day").innerHTML ='0'; 
+        //document.getElementById("hour").innerHTML ='0'; 
+        document.getElementById("minute").innerHTML ='0' ;  
+        document.getElementById("second").innerHTML = '0'; }
+      }, 1000); }
+      
+      
+      
+      //SEND TEXT BOX ENTRY TO LARGE DISPLAY
+      //wss://p3-websockets-edrees-g-edreesgul815250.codeanyapp.com/ws/draw/largeDisplay
+      
+      var socket = new WebSocket('ws://p3-websockets-edrees-g-edreesgul815250.codeanyapp.com:3000/');
+      
+      
+      var myText = document.getElementById("myText");
+      myText.addEventListener("change", (ev) => {
+        var text = (ev.target.value);
+        socket.send(text);
+      })
+      
+      socket.onopen = function(msg) {
+        socket.send('fk')
+      }
+      
+      
+
+      $('.special').on('click', function(event) {  //when you click on submit
+        event.preventDefault();
+        var details = {first_name: firstname, response: response}; 
+        var jsonstring = JSON.stringify(details);
+        socket.send(jsonstring);
+      })
+//       $(".special").on("submit", function(event) {
+//           event.preventDefault();
+//         })
+      
+//       $(".answer").on(‘click’, function(event) {
+//         var details = {response: response, first: firstname, last: lastname}; 
+//         var jsonstring = JSON.stringify(details);
+//         socket.send(jsonstring);
+//         $(".answer").submit()
+//         });
+      
+      socket.onclose = function(e) {
+        console.error('Chat socket closed unexpectedly');
+      };
+      
+    </script>
+    
+  </body>
+    
+</html>

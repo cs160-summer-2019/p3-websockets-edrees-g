@@ -2,6 +2,7 @@
 
 <!DOCTYPE html>
 <html>
+  
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <title>P4 Drawing</title>
@@ -14,10 +15,17 @@
     </style>
 
 </head>
+  
 <body>
-    <!-- You may change the dimensions of this canvas -->
-    <canvas id="myCanvas" width="1000px" height="1000px"></canvas>
+  
+  <!-- You may change the dimensions of this canvas -->
+  <canvas id="myCanvas" width="1000px" height="1000px"></canvas>
+ 
+
+  
+  
 </body>
+  
 <script>
 
   // setting up the canvas and one paper tool
@@ -86,22 +94,24 @@
     console.error('Chat socket closed unexpectedly');
   };
   
-  $(document).ready(() => {
-    window.addEventListener('devicemotion', (event) => {
-      if ((Math.abs(event.acceleration.x) > 10) || (Math.abs(event.acceleration.y) > 10) || (Math.abs(event.acceleration.z) > 10)) {
-        paper.project.clear();
-      }
-    });
+//   $(document).ready(() => {
+//     window.addEventListener('devicemotion', (event) => {
+//       if ((Math.abs(event.acceleration.x) > 10) || (Math.abs(event.acceleration.y) > 10) || (Math.abs(event.acceleration.z) > 10)) {
+//         paper.project.clear();
+//       }
+//     });
     
-    window.addEventListener('deviceorientation', (event) => {
-      console.log('first');
-      if (Math.abs(event.gamma) > 15) {
-        color = getRandomColor();
-      }
-    });
-  });
+//     window.addEventListener('deviceorientation', (event) => {
+//       console.log('first');
+//       if (Math.abs(event.gamma) > 15) {
+//         color = getRandomColor();
+//       }
+//     });
+//   });
 
 
 
 </script>
+  
+  
 </html>
