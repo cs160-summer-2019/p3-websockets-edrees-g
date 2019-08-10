@@ -4,14 +4,156 @@
 <html>
   
 <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-    <title>P4 Drawing</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <title>P4 Drawing</title>
 
-    <link rel="stylesheet" type="text/css" href="{% static 'draw/vendor/bootstrap/css/bootstrap.min.css' %}">
-    <script type="text/javascript" src="{% static 'draw/vendor/jquery/jquery-3.3.1.min.js' %}"></script>
-    <script type="text/javascript" src="{% static 'draw/vendor/paper/paper-full.min.js' %}"></script>
+  <link rel="stylesheet" type="text/css" href="{% static 'draw/vendor/bootstrap/css/bootstrap.min.css' %}">
+  <script type="text/javascript" src="{% static 'draw/vendor/jquery/jquery-3.3.1.min.js' %}"></script>
+  <script type="text/javascript" src="{% static 'draw/vendor/paper/paper-full.min.js' %}"></script>
+<!--   Did I do this right OG there was no draw/vendor... it was just vendor/... -->
+  <script src="{% static 'draw/vendor/hammer/hammer.min.js' %}"></script>
+	<script src="{% static 'draw/vendor/hammer/jquery.hammer.js' %}"></script>
 
-    <style type="text/css">
+  <style type="text/css">
+    
+    #color-palette {
+      width: 35px;
+      background-color: #f1f1f1;
+      position: absolute;
+      top: 70px;
+      left: 163px;
+    }
+    .swatch {
+      width: 24px;
+      height: 24px;
+      -moz-border-radius: 12px;
+      -webkit-border-radius: 12px;
+      border-radius: 12px;
+      margin: 3px;
+    }
+    #myCanvas {
+      padding-left: 0;
+      padding-right: 0;
+      margin-left: auto;
+      margin-right: auto;
+      display: block;
+    }
+    .save_button {
+      top: 0;
+      left: 0;
+      background-color: #F5F5F5;
+      position: absolute;
+      padding: 10px;
+      border-radius: 25px;
+      margin: 10px 10px;
+    }
+    .reset_button {
+      top:0;
+      left: 75px;
+      background-color: #F5F5F5;
+      position: absolute;
+      padding: 10px;
+      border-radius: 25px;
+      margin: 10px 10px;
+    }
+    .hide_show_button {
+      top: 60px;
+      left: 0px;
+      background-color: #F5F5F5;
+      position: absolute;
+      padding: 10px;
+      border-radius: 25px;
+      margin: 10px 10px;
+    }
+    .white_button {
+      width: 40px;
+      background-color: #F5F5F5;
+      display: flex;
+      flex-wrap: wrap;
+      position: absolute;
+      float: left;
+      top: 0;
+      left: 150px;
+      border-radius: 25px;
+      margin: 13px 10px;
+    } 
+    
+    #myForm {
+      top: 0;
+      right: 0;
+      position: absolute;
+    }
+    
+    
+    .open-button {
+      background-color: #555;
+      color: white;
+      padding: 16px 20px;
+      border: none;
+      cursor: pointer;
+      opacity: 0.8;
+      position: fixed;
+      bottom: 23px;
+      right: 28px;
+      width: 280px;
+    }
+
+    /* The popup chat - hidden by default */
+    .chat-popup {
+      display: none;
+      position: fixed;
+      bottom: 0;
+      right: 15px;
+      border: 3px solid #f1f1f1;
+      z-index: 9;
+    }
+
+    /* Add styles to the form container */
+    .form-container {
+      max-width: 300px;
+      padding: 10px;
+      background-color: white;
+    }
+
+    /* Full-width textarea */
+    .form-container textarea {
+      width: 100%;
+      padding: 15px;
+      margin: 5px 0 22px 0;
+      border: none;
+      background: #f1f1f1;
+      resize: none;
+      min-height: 200px;
+    }
+
+    /* When the textarea gets focus, do something */
+    .form-container textarea:focus {
+      background-color: #ddd;
+      outline: none;
+    }
+
+    /* Set a style for the submit/send button */
+    .form-container .btn {
+      background-color: #4CAF50;
+      color: white;
+      padding: 16px 20px;
+      border: none;
+      cursor: pointer;
+      width: 100%;
+      margin-bottom:10px;
+      opacity: 0.8;
+    }
+
+    /* Add a red background color to the cancel button */
+    .form-container .cancel {
+      background-color: red;
+    }
+
+    /* Add some hover effects to buttons */
+    .form-container .btn:hover, .open-button:hover {
+      opacity: 1;
+    }
+    
     </style>
 
 </head>
@@ -19,98 +161,164 @@
 <body>
   
   <!-- You may change the dimensions of this canvas -->
-  <canvas id="myCanvas" width="1000px" height="1000px"></canvas>
- 
+  <canvas id="myCanvas" width="750px" height="750px"></canvas>
+  <div id="color-palette"></div>
+  <button class="white_button"> </button>
+  <button class="save_button">Save</button>
+  <button class="reset_button">Reset</button>
+  <button class="hide_show_button">Hide/Show</button>
+  
+  <button class="open-button" onclick="openForm()">Chat</button>
+
+  <div class="chat-popup" id="myForm">
+    <form action="/action_page.php" class="form-container">
+      <h1>Chat</h1>
+      <label for="msg"><b>Message</b></label>
+      <textarea placeholder="Type message.." name="msg" required></textarea>
+      <button type="submit" class="btn">Send</button>
+      <button type="button" id="cancel" class="btn cancel" onclick="closeForm()">Close</button>
+    </form>
+  </div>
 
   
   
 </body>
   
-<script>
-
-  // setting up the canvas and one paper tool
-  var canvas = document.getElementById('myCanvas');
-  paper.setup(canvas);
-  var tool = new paper.Tool();
-
-  //Random color generator was taken straight from stackoverflow:
-  //<https://stackoverflow.com/questions/1484506/random-color-generator>
-  function getRandomColor() {
-    var letters = '0123456789ABCDEF';
-    var color = '#';
-    for (var i = 0; i < 6; i++) {
-      color += letters[Math.floor(Math.random() * 16)];
+<script type="text/javascript" canvas="canvas">
+//   function openForm() {
+//     document.getElementById("myForm").style.display = "block";
+//   }
+  
+//   function closeForm() {
+//     document.getElementById("myForm").style.display = "none";
+//   }
+  
+  
+  
+  
+  window.onload = function() {
+    
+    
+    
+    var canvas = document.getElementById('myCanvas');
+    paper.setup(canvas);
+    var tool = new paper.Tool();
+    var url = window.location.href;
+    var users = {};
+    var userID = Math.random(); 
+    
+    var cp = {
+      history: ["#000000"], 
+      options: [],
+      $container: $('#color-palette')
     }
-    return color;
+    function createColorPalette(colors) {
+      for (var i = colors.length - 1; i >= 0; i--) {
+        var $swatch = $("<div>").css("background-color", colors[i]).addClass("swatch");
+        $swatch.click(function(){
+          cp.history.push($(this).css("background-color"));
+        });
+        cp.$container.append($swatch);
+      }
+    }
+    function getColorsCreatePalette() {
+      cp.$container.html(" ");
+      $.getJSON('/static/draw/vendor/material/material-colors.json', function(colors){
+        var keys = Object.keys(colors);
+        for (var i = keys.length - 1; i >= 0; i--) {
+          cp.options.push(colors[keys[i]][500]);
+        }
+        createColorPalette(cp.options);
+      });
+    }
+    function createEraser() {
+      var $swatch = $("<div>").css("background-color", "white").addClass("swatch");
+      $swatch.click(function(){
+        cp.history.push($(this).css("background-color"));
+      }); 
+      $(".white_button").append($swatch);
+    }
+    
+    { 
+     //How to return color from color palette
+//       return cp.history[cp.history.length-1];
+   }
+    
+    function init(custom) {
+      paper.setup(canvas);
+      getColorsCreatePalette();
+      createEraser();
+    }
+    init(true);
+    {
+          let $saveButton = $(".save_button");
+          $saveButton.on('click', () => {
+          window.print();
+          return false;
+          })
+          let $chatbtn = $(".open-button");
+          let $chatbox = $("#myForm");
+          $chatbtn.on('click', () => {
+            $chatbtn.hide();
+            $chatbox.show();
+          })
+          let $closebtn = $("#cancel");
+          $closebtn.on('click'), () => {
+            $chatbox.hide();
+            $chatbtn.show();
+          }
+          let $resetButton = $(".reset_button");
+          $resetButton.on('click', () => {
+            location.reload();
+          })
+          let $toggleButton = $(".hide_show_button");
+          let $colorPalette = $("#color-palette")
+          $toggleButton.on('click', () => {
+            $colorPalette.toggle();
+          })
+        }
+    
+    
+    var color = $(function() {
+      var stop = true;
+      setInterval(function() {color = cp.history[cp.history.length-1];}, 1000);});
+    
+    var socket = new WebSocket('wss://p3-websockets-edrees-g-edreesgul815250.codeanyapp.com/ws/draw');
+    
+    //OG it was tool.onMouseMove
+    tool.onMouseDrag = function(event) {
+//       var path = new Path();
+//       path.strokeColor = color;
+//       path.add(event.middlePoint);
+//       path.position += event.delta;
+      var xPos = event.point.x;
+      var yPos = event.point.y;
+      var message = JSON.stringify({x: xPos, y:yPos, color: color, user: userID, url: url});
+      socket.send(message);
+    }
+    
+    socket.onmessage = function(receivedMessage) {
+      var data = JSON.parse(receivedMessage.data);
+
+      if (!(data.user in users)) {
+        users[data.user] = new paper.Path();
+      };
+
+      if (url == "http://p3-websockets-edrees-g-edreesgul815250.codeanyapp.com/draw/?size=large") {
+        users[data.user].strokeColor = data.color;
+        users[data.user].strokeWidth = 10;
+        var point = new paper.Point(data.x, data.y);
+        users[data.user].add(point);
+      } else if (data.user == userID) {
+        users[data.user].strokeColor = data.color;
+        users[data.user].strokeWidth = 10;
+        var point = new paper.Point(data.x, data.y);
+        users[data.user].add(point);
+      }
+    };
+        
   }
   
-  // getting the URL (you may want to use for Exercise 3)
-  var url = window.location.href;
-  
-  var users = {};
-  var userID = Math.random();
-  //var path = new paper.Path(); 
-  var color = getRandomColor();
-//   path.strokeColor = color;
-//   path.strokeWidth = 5;
-//   var message;
-  
-  var socket = new WebSocket('wss://p3-websockets-edrees-g-edreesgul815250.codeanyapp.com/ws/draw');
-  
-  tool.onMouseMove = function(event) {
-//    path.add(event.point);
-//     var color = getRandomColor();
-//     path.strokeColor = color;
-//     path.strokeWidth = 5;
-    var xPos = event.point.x;
-    var yPos = event.point.y;
-    var message = JSON.stringify({x: xPos, y:yPos, color: color, user: userID, url: url});
-    socket.send(message);
-  }
-  
-  socket.onmessage = function(receivedMessage) {
-    var data = JSON.parse(receivedMessage.data);
-    
-    if (!(data.user in users)) {
-      users[data.user] = new paper.Path();
-      //users[data.user].strokeWidth = 5;
-    };
-    
-    if (url == "http://p3-websockets-edrees-g-edreesgul815250.codeanyapp.com/draw/?size=large") {
-      users[data.user].strokeColor = data.color;
-      users[data.user].strokeWidth = 10;
-      var point = new paper.Point(data.x, data.y);
-      users[data.user].add(point);
-    } else if (data.user == userID) {
-      users[data.user].strokeColor = data.color;
-      users[data.user].strokeWidth = 10;
-      var point = new paper.Point(data.x, data.y);
-      users[data.user].add(point);
-    }
-         
-    };
-  
-  socket.onclose = function(e) {
-    console.error('Chat socket closed unexpectedly');
-  };
-  
-//   $(document).ready(() => {
-//     window.addEventListener('devicemotion', (event) => {
-//       if ((Math.abs(event.acceleration.x) > 10) || (Math.abs(event.acceleration.y) > 10) || (Math.abs(event.acceleration.z) > 10)) {
-//         paper.project.clear();
-//       }
-//     });
-    
-//     window.addEventListener('deviceorientation', (event) => {
-//       console.log('first');
-//       if (Math.abs(event.gamma) > 15) {
-//         color = getRandomColor();
-//       }
-//     });
-//   });
-
-
-
 </script>
   
   
